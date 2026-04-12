@@ -1,0 +1,36 @@
+services:
+
+  adminer:
+    container_name: ADm
+    env_file:
+      - .env
+    image: adminer:latest
+    restart: unless-stopped
+    environment:
+      ADMINER_DEFAULT_SERVER: ${DB_HOST}
+    ports:
+      - 8081:8080
+
+  pgm:
+    container_name: PGm
+    image: postgres:16
+    restart: unless-stopped
+    volumes:
+      - pgv:/var/lib/postgresql/data
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    # ports:
+    #   - "${DB_PORT}:5432"
+
+volumes:
+  pgv:
+    name: PGv
+
+networks:
+  default:
+    name: prodnet
+    external: true

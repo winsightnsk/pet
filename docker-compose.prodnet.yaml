@@ -1,0 +1,13 @@
+services:
+  dummy:
+    image: alpine:latest
+    command: sleep infinity
+    networks:
+      - prodnet
+    deploy:
+      replicas: 0  # Не запускать контейнер
+
+networks:
+  prodnet:
+    driver: bridge
+    name: prodnet
