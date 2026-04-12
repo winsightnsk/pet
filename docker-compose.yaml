@@ -1,0 +1,74 @@
+services:
+
+  pgm:
+    container_name: PGm
+    image: postgres:16
+    restart: unless-stopped
+    volumes:
+      - pgv:/var/lib/postgresql/data
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    # ports:
+    #   - "${DB_PORT}:5432"
+
+  adminer:
+    container_name: ADm
+    env_file:
+      - .env
+    image: adminer:latest
+    restart: unless-stopped
+    depends_on:
+      - pgm
+    environment:
+      ADMINER_DEFAULT_SERVER: ${DB_HOST}
+    ports:
+      - 8081:8080
+
+  app1:
+    build:
+      context: ./webapp/app1/
+      dockerfile: Dockerfile
+    depends_on:
+      - pgm
+    restart: unless-stopped
+
+  app2:
+    build:
+      context: ./webapp/app2/
+      dockerfile: Dockerfile
+    depends_on:
+      - pgm
+    restart: unless-stopped
+
+  pet:
+    build:
+      context: ./webapp/pet/
+      dockerfile: Dockerfile
+    depends_on:
+      - pgm
+    restart: unless-stopped
+
+  nginx:
+    image: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - adminer
+      - app1
+      - app2
+      - pet
+
+volumes:
+  pgv:
+    name: PGv
+
+networks:
+  default:
+    name: prodnet
