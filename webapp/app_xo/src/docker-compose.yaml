@@ -12,6 +12,8 @@ services:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - ${DB_PORT}:5432
 
   adminer:
     container_name: ADm
@@ -25,38 +27,6 @@ services:
       ADMINER_DEFAULT_SERVER: ${DB_HOST}
     ports:
       - 8081:8080
-
-  xo:
-    build:
-      context: ./webapp/app_xo/
-      dockerfile: Dockerfile
-    env_file:
-      - .env
-    depends_on:
-      - pgm
-    restart: unless-stopped
-
-  pet:
-    build:
-      context: ./webapp/pet/
-      dockerfile: Dockerfile
-    depends_on:
-      - pgm
-    restart: unless-stopped
-    ports:
-      - 80:8080
-
-  nginx:
-    image: nginx
-    ports:
-      - 80:80
-    volumes:
-      - ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      - adminer
-      - xo
-      - pet
 
 volumes:
   pgv:
